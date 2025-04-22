@@ -1,0 +1,18 @@
+{
+    "files.exclude": {
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.idea": true,
+        "**/.ruff_cache": true
+    },
+    "cSpell.words": [
+        "Ahmadi",
+        "ahmadiehsan",
+        "Ehsan",
+        "fstring",
+        "funcs",
+        "kwargs",
+        "tomli"
+    ]
+}

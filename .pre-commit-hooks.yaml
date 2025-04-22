@@ -1,0 +1,18 @@
+- id: dir_checker
+  name: validate directories
+  language: python
+  entry: dir_checker
+  pass_filenames: false
+
+- id: python_checker
+  name: validate python files
+  language: python
+  entry: python_checker
+  types_or: [python]
+
+- id: compose_checker
+  name: validate docker compose files
+  language: python
+  entry: compose_checker
+  files: (docker-)?compose.*\.ya?ml$
+  pass_filenames: false

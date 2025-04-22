@@ -1,0 +1,24 @@
+name: Mirror
+
+on:
+  push:
+    branches: [ "*" ]  # Trigger on push to any branch
+    tags: [ "*" ]  # Trigger on push to any tag
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        run: git clone --bare https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git repo
+      - name: Push To Mirror
+        working-directory: repo
+        run: |
+          git remote add mirror ${{ secrets.MIRROR_URL }}
+          git push --mirror mirror

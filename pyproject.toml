@@ -1,0 +1,126 @@
+# =========================
+# Project
+# =====
+[project]
+name = "fixmate"
+version = "1.0.0"
+description = "Your project's best mate for checking and fixing code"
+authors = [{ name = "Ehsan Ahmadi", email = "1374ea@gmail.com" }]
+requires-python = ">=3.9,<4.0.0"
+readme = "README.md"
+dependencies = ["tomli>=2.2.1,<3"]
+
+[project.urls]
+Repository = "https://github.com/ahmadiehsan/fixmate"
+
+[project.scripts]
+dir_checker = "fixmate.dir_checker.cli:main"
+python_checker = "fixmate.python_checker.cli:main"
+compose_checker = "fixmate.compose_checker.cli:main"
+
+[dependency-groups]
+dev = ["mypy>=1.15.0,<2", "pre-commit>=4.2.0,<5", "ruff>=0.11.4,<0.12"]
+
+[tool.setuptools.packages.find]
+include = ["fixmate*"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+# =========================
+# Ruff
+# =====
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+fix = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D104",   # undocumented-public-package
+    "D100",   # undocumented-public-module
+    "D101",   # undocumented-public-class
+    "D106",   # undocumented-public-nested-class
+    "D107",   # undocumented-public-init
+    "D102",   # undocumented-public-method
+    "D105",   # undocumented-magic-method
+    "D103",   # undocumented-public-function
+    "ANN001", # missing-type-function-argument
+    "ANN002", # missing-type-args
+    "ANN003", # missing-type-kwargs
+    "ANN201", # missing-return-type-undocumented-public-function
+    "ANN202", # missing-return-type-private-function
+    "ANN204", # missing-return-type-special-method
+    "ANN205", # missing-return-type-static-method
+    "ANN206", # missing-return-type-class-method
+    "G004",   # logging-f-string
+    "D203",   # one-blank-line-before-class (conflict with D211)
+    "D213",   # multi-line-summary-second-line (conflict with D212)
+    "COM812", # missing-trailing-comma (Suggested by ruff to disable)
+    "ISC001", # single-line-implicit-string-concatenation (Suggested by ruff to disable)
+]
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+# =========================
+# MyPy
+# =====
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_unreachable = true
+warn_redundant_casts = true
+strict_equality = true
+strict_concatenate = true
+implicit_reexport = false
+
+# =========================
+# Pylint
+# =====
+[tool.pylint.main]
+py-version = "3.9"
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.design]
+min-public-methods = 1
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "import-error",
+    "duplicate-code",
+    "logging-fstring-interpolation",
+    "fixme",                         # Ruff will handle it
+    "broad-exception-raised",        # Ruff will handle it
+    "line-too-long",                 # Ruff will handle it
+    "unused-argument",               # Ruff will handle it
+    "too-many-arguments",            # Ruff will handle it
+    "too-many-branches",             # Ruff will handle it
+    "too-many-statements",           # Ruff will handle it
+    "bare-except",                   # Ruff will handle it
+    "unsupported-binary-operation",  # Ruff will handle it
+]
+
+# =========================
+# Python Checker
+# =====
+[tool.python_checker.per-file-ignores]
+"fixmate/helpers" = ["func_validator"]
+"fixmate/dir_checker/cli.py" = ["func_validator"]
+"fixmate/python_checker/cli.py" = ["func_validator"]
+"fixmate/compose_checker/cli.py" = ["func_validator"]
