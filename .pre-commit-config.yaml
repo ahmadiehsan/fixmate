@@ -36,7 +36,7 @@ repos:
       - id: ruff-format
 
   - repo: .
-    rev: 1.0.0
+    rev: 1.0.1
     hooks:
       - id: dir_checker
       - id: python_checker
