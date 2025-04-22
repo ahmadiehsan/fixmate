@@ -20,6 +20,7 @@ def main() -> None:
         sys.exit(1)
     else:
         _logger.info(result.stdout)
+        sys.exit(result.returncode)
 
 
 if __name__ == "__main__":
