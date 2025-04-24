@@ -4,7 +4,7 @@ from fixmate.dir_checker._dto import DirSpecsDto
 
 
 class InitPyValidator:
-    _error_code = "init_py_validator"
+    error_code = "init_py_validator"
 
     def validate(self, dir_specs: DirSpecsDto) -> None:
         is_hidden = any(p.startswith(".") for p in dir_specs.rel_path.parts)
@@ -12,7 +12,7 @@ class InitPyValidator:
         has_init_py = self._has_init_py(dir_specs.abs_path)
 
         if not is_hidden and has_py_files and not has_init_py:
-            error = f"{dir_specs.rel_path}: missing __init__.py file [{self._error_code}]"
+            error = f"{dir_specs.rel_path}: missing __init__.py file [{self.error_code}]"
             dir_specs.errors.append(error)
 
     @staticmethod

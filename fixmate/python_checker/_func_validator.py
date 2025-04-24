@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class FuncValidator:
-    _error_code = "func_validator"
+    error_code = "func_validator"
 
     def validate(self, tree: ast.AST, file_specs: FileSpecsDto) -> None:
         for node in ast.walk(tree):
@@ -23,7 +23,7 @@ class FuncValidator:
                 error = (
                     f"{file_specs.rel_path}:{func_node.lineno}: "
                     f"top-level public function '{func_node.name}' is not allowed in a public module "
-                    f"[{self._error_code}]"
+                    f"[{self.error_code}]"
                 )
                 file_specs.errors.append(error)
 

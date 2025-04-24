@@ -10,7 +10,7 @@ _TStrVars = dict[str, tuple[str, int]]
 
 
 class MsgValidator:
-    _error_code = "msg_validator"
+    error_code = "msg_validator"
 
     def validate(self, tree: ast.AST, file_specs: FileSpecsDto) -> None:
         variables = self._collect_str_vars(tree)
@@ -92,16 +92,12 @@ class MsgValidator:
             for string, line in strings:
                 if string and string[0].isupper():
                     error = (
-                        f"{file_specs.rel_path}:{line}: "
-                        f"{category} '{string}' starts with uppercase "
-                        f"[{self._error_code}]"
+                        f"{file_specs.rel_path}:{line}: {category} '{string}' starts with uppercase [{self.error_code}]"
                     )
                     file_specs.errors.append(error)
 
                 if string and string[-1] in (".", ":", "?", "!"):
                     error = (
-                        f"{file_specs.rel_path}:{line}: "
-                        f"{category} '{string}' ends with punctuation "
-                        f"[{self._error_code}]"
+                        f"{file_specs.rel_path}:{line}: {category} '{string}' ends with punctuation [{self.error_code}]"
                     )
                     file_specs.errors.append(error)

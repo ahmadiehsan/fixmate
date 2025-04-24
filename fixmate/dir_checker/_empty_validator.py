@@ -4,14 +4,14 @@ from fixmate.dir_checker._dto import DirSpecsDto
 
 
 class EmptyValidator:
-    _error_code = "emptry_validator"
+    error_code = "emptry_validator"
 
     def validate(self, dir_specs: DirSpecsDto) -> None:
         is_hidden = any(p.startswith(".") for p in dir_specs.rel_path.parts)
         is_empty = self._is_empty(dir_specs.abs_path)
 
         if not is_hidden and is_empty:
-            error = f"{dir_specs.rel_path}: is an empty directory [{self._error_code}]"
+            error = f"{dir_specs.rel_path}: is an empty directory [{self.error_code}]"
             dir_specs.errors.append(error)
 
     @staticmethod
