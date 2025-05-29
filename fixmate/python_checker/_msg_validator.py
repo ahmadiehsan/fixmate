@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import ast
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fixmate.python_checker._dto import FileSpecsDto
 
 _TStrVars = dict[str, tuple[str, int]]
+
+
+class _MsgCategory(str, Enum):
+    LOG = "log"
+    EXCEPTION = "exception"
 
 
 class MsgValidator:
@@ -19,11 +25,11 @@ class MsgValidator:
             # Check for logging calls
             log_funcs = {"info", "debug", "error", "warning", "critical"}
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in log_funcs:
-                self._check_node(node.args, variables, "log", file_specs)
+                self._check_node(node.args, variables, _MsgCategory.LOG, file_specs)
 
             # Check for exception raises
             if isinstance(node, ast.Raise) and isinstance(node.exc, ast.Call):
-                self._check_node(node.exc.args, variables, "exception", file_specs)
+                self._check_node(node.exc.args, variables, _MsgCategory.EXCEPTION, file_specs)
 
     def _collect_str_vars(self, tree: ast.AST) -> _TStrVars:
         """Collect variables mapped to their first assigned string constant."""
@@ -80,8 +86,9 @@ class MsgValidator:
 
         return strings
 
-    def _check_node(self, args: list[ast.expr], variables: _TStrVars, category: str, file_specs: FileSpecsDto) -> None:
-        """Check if string arguments start with uppercase."""
+    def _check_node(
+        self, args: list[ast.expr], variables: _TStrVars, category: _MsgCategory, file_specs: FileSpecsDto
+    ) -> None:
         for arg in args:
             if not isinstance(arg, ast.Name):
                 strings = self._get_strings(arg)
@@ -89,15 +96,26 @@ class MsgValidator:
                 key = self._unique_key(arg)
                 strings = [variables[key]] if key in variables else []
 
+            file_rel_path = file_specs.rel_path
+
             for string, line in strings:
-                if string and string[0].isupper():
-                    error = (
-                        f"{file_specs.rel_path}:{line}: {category} '{string}' starts with uppercase [{self.error_code}]"
-                    )
+                if category == _MsgCategory.LOG and self._starts_with_lowercase(string):
+                    error = f"{file_rel_path}:{line}: {category} '{string}' starts with lowercase [{self.error_code}]"
                     file_specs.errors.append(error)
 
-                if string and string[-1] in (".", ":", "?", "!"):
-                    error = (
-                        f"{file_specs.rel_path}:{line}: {category} '{string}' ends with punctuation [{self.error_code}]"
-                    )
+                if category == _MsgCategory.EXCEPTION and self._starts_with_uppercase(string):
+                    error = f"{file_rel_path}:{line}: {category} '{string}' starts with uppercase [{self.error_code}]"
                     file_specs.errors.append(error)
+
+                if category == _MsgCategory.EXCEPTION and self._ends_with_punctuation(string):
+                    error = f"{file_rel_path}:{line}: {category} '{string}' ends with punctuation [{self.error_code}]"
+                    file_specs.errors.append(error)
+
+    def _starts_with_uppercase(self, string: str) -> bool:
+        return bool(string) and string[0].isupper()
+
+    def _starts_with_lowercase(self, string: str) -> bool:
+        return bool(string) and not string[0].isupper()
+
+    def _ends_with_punctuation(self, string: str) -> bool:
+        return bool(string) and string[-1] in (".", ":", "?", "!")
