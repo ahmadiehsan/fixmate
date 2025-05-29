@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 _TStrVars = dict[str, tuple[str, int]]
 
 
-class _MsgCategory(str, Enum):
+class _MsgCategory(Enum):
     LOG = "log"
     EXCEPTION = "exception"
 
@@ -97,18 +97,19 @@ class MsgValidator:
                 strings = [variables[key]] if key in variables else []
 
             file_rel_path = file_specs.rel_path
+            cat_name = category.value
 
             for string, line in strings:
                 if category == _MsgCategory.LOG and self._starts_with_lowercase(string):
-                    error = f"{file_rel_path}:{line}: {category} '{string}' starts with lowercase [{self.error_code}]"
+                    error = f"{file_rel_path}:{line}: {cat_name} '{string}' starts with lowercase [{self.error_code}]"
                     file_specs.errors.append(error)
 
                 if category == _MsgCategory.EXCEPTION and self._starts_with_uppercase(string):
-                    error = f"{file_rel_path}:{line}: {category} '{string}' starts with uppercase [{self.error_code}]"
+                    error = f"{file_rel_path}:{line}: {cat_name} '{string}' starts with uppercase [{self.error_code}]"
                     file_specs.errors.append(error)
 
                 if category == _MsgCategory.EXCEPTION and self._ends_with_punctuation(string):
-                    error = f"{file_rel_path}:{line}: {category} '{string}' ends with punctuation [{self.error_code}]"
+                    error = f"{file_rel_path}:{line}: {cat_name} '{string}' ends with punctuation [{self.error_code}]"
                     file_specs.errors.append(error)
 
     def _starts_with_uppercase(self, string: str) -> bool:
