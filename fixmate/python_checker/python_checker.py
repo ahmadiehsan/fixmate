@@ -38,7 +38,7 @@ class PythonChecker:
                 _logger.error(error)
             raise SystemExit(1)
 
-        _logger.info("all checks passed")
+        _logger.info("All checks passed")
         raise SystemExit(0)
 
     def _validate_files(self, exec_abs_path: Path, files_to_check: list[str]) -> list[str]:

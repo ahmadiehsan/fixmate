@@ -35,7 +35,7 @@ class DirChecker:
                 _logger.error(error)
             raise SystemExit(1)
 
-        _logger.info("all checks passed")
+        _logger.info("All checks passed")
         raise SystemExit(0)
 
     def _validate_dirs(self, exec_abs_path: Path, dirs_to_check: list[str]) -> list[str]:
