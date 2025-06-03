@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fixmate"
-version = "2.0.1"
+version = "2.0.2"
 description = "Your project's best mate for checking and fixing code"
 authors = [{ name = "Ehsan Ahmadi", email = "1374ea@gmail.com" }]
 requires-python = ">=3.9,<4.0.0"

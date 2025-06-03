@@ -78,11 +78,9 @@ class MsgValidator:
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
             strings.append((node.value, node.lineno))
         if isinstance(node, ast.JoinedStr):
-            strings.extend(
-                (part.value, part.lineno)
-                for part in node.values
-                if isinstance(part, ast.Constant) and isinstance(part.value, str)
-            )
+            parts = [part for part in node.values if isinstance(part, ast.Constant) and isinstance(part.value, str)]
+            value = "".join(p.value for p in parts)
+            strings.append((value, parts[0].lineno))
 
         return strings
 
@@ -113,10 +111,10 @@ class MsgValidator:
                     file_specs.errors.append(error)
 
     def _starts_with_uppercase(self, string: str) -> bool:
-        return bool(string) and string[0].isupper()
+        return bool(string) and string[0].isalpha() and string[0].isupper()
 
     def _starts_with_lowercase(self, string: str) -> bool:
-        return bool(string) and not string[0].isupper()
+        return bool(string) and string[0].isalpha() and string[0].islower()
 
     def _ends_with_punctuation(self, string: str) -> bool:
         return bool(string) and string[-1] in (".", ":", "?", "!")
