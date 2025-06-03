@@ -79,7 +79,7 @@ class MsgValidator:
             strings.append((node.value, node.lineno))
         if isinstance(node, ast.JoinedStr):
             parts = [part for part in node.values if isinstance(part, ast.Constant) and isinstance(part.value, str)]
-            value = "".join(p.value for p in parts)
+            value = "<VAR>".join(p.value for p in parts)
             strings.append((value, parts[0].lineno))
 
         return strings
