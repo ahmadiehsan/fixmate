@@ -2,17 +2,28 @@ exclude: ^(\.venv)
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
+      - id: check-toml
+      - id: check-xml
       - id: end-of-file-fixer
         stages: [pre-commit]
       - id: trailing-whitespace
         stages: [pre-commit]
       - id: check-merge-conflict
+      - id: check-added-large-files
+        stages: [pre-commit]
+      - id: check-executables-have-shebangs
+        stages: [pre-commit]
+      - id: check-shebang-scripts-are-executable
+        stages: [pre-commit]
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-symlinks
 
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.11.0-1
+    rev: v3.12.0-2
     hooks:
       - id: shfmt
         args: [--indent, "2", --write]
@@ -25,14 +36,14 @@ repos:
         args: [--config, "./.checkmake.ini"]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.6.14
+    rev: 0.8.10
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.5
+    rev: v0.12.7
     hooks:
-      - id: ruff
+      - id: ruff-check
       - id: ruff-format
 
   - repo: .
@@ -42,11 +53,11 @@ repos:
       - id: python_checker
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.17.1
     hooks:
       - id: mypy
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.3.6
+    rev: v3.3.8
     hooks:
       - id: pylint

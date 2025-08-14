@@ -6,11 +6,14 @@
         "**/.idea": true,
         "**/.ruff_cache": true
     },
+    "search.exclude": {
+        "**/uv.lock": true
+    },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
         "pyproject.toml": "uv.lock, .python-version",
-        ".pre-commit-config.yaml": ".env, .checkmake.ini",
+        ".pre-commit-config.yaml": ".env, .checkmake.ini, .opencommitignore",
     },
     "cSpell.words": [
         "Ahmadi",

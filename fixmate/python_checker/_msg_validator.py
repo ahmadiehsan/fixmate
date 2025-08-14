@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from fixmate.python_checker._dto import FileSpecsDto
@@ -79,7 +79,7 @@ class MsgValidator:
             strings.append((node.value, node.lineno))
         if isinstance(node, ast.JoinedStr):
             parts = [part for part in node.values if isinstance(part, ast.Constant) and isinstance(part.value, str)]
-            value = "<VAR>".join(p.value for p in parts)
+            value = "<VAR>".join(cast("str", p.value) for p in parts)
             strings.append((value, parts[0].lineno))
 
         return strings

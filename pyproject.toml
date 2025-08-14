@@ -23,7 +23,7 @@ python_checker = "fixmate.python_checker.cli:main"
 compose_checker = "fixmate.compose_checker.cli:main"
 
 [dependency-groups]
-dev = ["mypy>=1.15.0,<2", "pre-commit>=4.2.0,<5", "ruff>=0.11.4,<0.12"]
+dev = ["mypy>=1.17.1,<2", "pre-commit>=4.3.0,<5", "ruff>=0.12.7,<0.13"]
 
 [tool.setuptools.package-data]
 "*" = ["*.*"]
