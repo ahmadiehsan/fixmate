@@ -7,38 +7,35 @@ import os
 from pathlib import Path
 from typing import NoReturn
 
-import tomli
-
+from fixmate.helpers.config_loader import load_configs
 from fixmate.helpers.dir_tools import is_blacklisted_dir, is_hidden_dir
-from fixmate.helpers.logger import setup_logger
 from fixmate.python_checker._dto import FileSpecsDto
 from fixmate.python_checker._func_validator import FuncValidator
 from fixmate.python_checker._import_validator import ImportValidator
 from fixmate.python_checker._msg_validator import MsgValidator
 
-_logger = logging.getLogger(__name__)
-
 
 class PythonChecker:
     def __init__(self, config_path: Path | None = None) -> None:
-        self._config_path = config_path or Path("pyproject.toml")
+        config_path = config_path or Path("pyproject.toml")
+        self._configs = load_configs(config_path, "python_checker")
         self._ignore_rules = self._load_ignore_rules()
         self._msg_validator = MsgValidator()
         self._import_validator = ImportValidator()
         self._func_validator = FuncValidator()
+        self._logger = logging.getLogger(__name__)
 
     def run(self, files_to_check: list[str] | None = None) -> NoReturn:
-        setup_logger()
         files_to_check = files_to_check or []
         exec_abs_path = Path.cwd()
         errors = self._validate_files(exec_abs_path, files_to_check)
 
         if errors:
             for error in errors:
-                _logger.error(error)
+                self._logger.error(error)
             raise SystemExit(1)
 
-        _logger.info("All checks passed")
+        self._logger.info("All checks passed")
         raise SystemExit(0)
 
     def _validate_files(self, exec_abs_path: Path, files_to_check: list[str]) -> list[str]:
@@ -118,10 +115,4 @@ class PythonChecker:
             self._set_parents(child, node)
 
     def _load_ignore_rules(self) -> dict[str, list[str]]:
-        if not self._config_path.exists():
-            return {}
-
-        with self._config_path.open("rb") as f:
-            config = tomli.load(f)
-
-        return config.get("tool", {}).get("python_checker", {}).get("per-file-ignores", {})
+        return self._configs.get("per-file-ignores", {})

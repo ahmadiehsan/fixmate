@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 
 def main() -> None:
     setup_logger()
+
     script_path = Path(__file__).parent / "compose_checker.sh"
     cmd = [str(script_path), *sys.argv[1:]]
 

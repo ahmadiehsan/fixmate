@@ -6,36 +6,33 @@ import os
 from pathlib import Path
 from typing import NoReturn
 
-import tomli
-
 from fixmate.dir_checker._dto import DirSpecsDto
 from fixmate.dir_checker._empty_validator import EmptyValidator
 from fixmate.dir_checker._init_py_validator import InitPyValidator
+from fixmate.helpers.config_loader import load_configs
 from fixmate.helpers.dir_tools import is_blacklisted_dir, is_hidden_dir
-from fixmate.helpers.logger import setup_logger
-
-_logger = logging.getLogger(__name__)
 
 
 class DirChecker:
     def __init__(self, config_path: Path | None = None) -> None:
-        self._config_path = config_path or Path("pyproject.toml")
+        config_path = config_path or Path("pyproject.toml")
+        self._configs = load_configs(config_path, "dir_checker")
         self._ignore_rules = self._load_ignore_rules()
         self._empty_validator = EmptyValidator()
         self._init_py_validator = InitPyValidator()
+        self._logger = logging.getLogger(__name__)
 
     def run(self, dirs_to_check: list[str] | None = None) -> NoReturn:
-        setup_logger()
         dirs_to_check = dirs_to_check or []
         exec_abs_path = Path.cwd()
         errors = self._validate_dirs(exec_abs_path, dirs_to_check)
 
         if errors:
             for error in errors:
-                _logger.error(error)
+                self._logger.error(error)
             raise SystemExit(1)
 
-        _logger.info("All checks passed")
+        self._logger.info("All checks passed")
         raise SystemExit(0)
 
     def _validate_dirs(self, exec_abs_path: Path, dirs_to_check: list[str]) -> list[str]:
@@ -78,15 +75,6 @@ class DirChecker:
         if self._init_py_validator.error_code not in ignored_validators:
             self._init_py_validator.validate(dir_specs)
 
-    def _load_ignore_rules(self) -> dict[str, list[str]]:
-        if not self._config_path.exists():
-            return {}
-
-        with self._config_path.open("rb") as f:
-            config = tomli.load(f)
-
-        return config.get("tool", {}).get("dir_checker", {}).get("per-dir-ignores", {})
-
     def _get_ignored_validators(self, dir_rel_path: Path) -> list[str]:
         """Return validators to ignore for a given directory."""
         all_ignored_validators = []
@@ -97,3 +85,6 @@ class DirChecker:
                 all_ignored_validators.extend(ignored_validators)
 
         return all_ignored_validators
+
+    def _load_ignore_rules(self) -> dict[str, list[str]]:
+        return self._configs.get("per-dir-ignores", {})
