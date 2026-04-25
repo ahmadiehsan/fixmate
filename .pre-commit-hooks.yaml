@@ -8,11 +8,18 @@
   name: validate python files
   language: python
   entry: python_checker
-  types_or: [python]
+  types_or: [ python ]
 
 - id: compose_checker
   name: validate docker compose files
   language: python
   entry: compose_checker
   files: (docker-)?compose.*\.ya?ml$
+  pass_filenames: false
+
+- id: just_indexer
+  name: generate just index file
+  language: python
+  entry: just_indexer
+  files: .*\.just$
   pass_filenames: false
