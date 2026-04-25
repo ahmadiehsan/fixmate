@@ -13,7 +13,7 @@
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
         "pyproject.toml": "uv.lock, .python-version",
-        ".pre-commit-config.yaml": ".env, .checkmake.ini, .opencommitignore",
+        ".pre-commit-config.yaml": ".env, .opencommitignore",
     },
     "cSpell.words": [
         "Ahmadi",
