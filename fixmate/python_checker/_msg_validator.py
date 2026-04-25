@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import ast
+from contextlib import suppress
 from enum import Enum
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fixmate.python_checker._dto import FileSpecsDto
@@ -44,7 +45,7 @@ class MsgValidator:
                     continue
 
                 key = self._unique_key(target)
-                strings = self._get_strings(node.value)
+                strings = self._get_strings(node.value, variables)
 
                 if strings:
                     variables[key] = strings[0]
@@ -70,29 +71,92 @@ class MsgValidator:
 
         return "global"
 
-    @staticmethod
-    def _get_strings(node: ast.AST) -> list[tuple[str, int]]:
+    def _get_strings(self, node: ast.AST, variables: _TStrVars | None = None) -> list[tuple[str, int]]:
         """Extract string constants and their line numbers from an AST node."""
-        strings: list[tuple[str, int]] = []
+        known_vars = variables or {}
 
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            strings.append((node.value, node.lineno))
-        if isinstance(node, ast.JoinedStr):
-            parts = [part for part in node.values if isinstance(part, ast.Constant) and isinstance(part.value, str)]
-            value = "<VAR>".join(cast("str", p.value) for p in parts)
-            strings.append((value, parts[0].lineno))
+            return [(node.value, node.lineno)]
 
-        return strings
+        if isinstance(node, ast.Name):
+            return self._get_name_strings(node, known_vars)
+
+        if isinstance(node, ast.JoinedStr):
+            resolved = self._resolve_joined_string(node, known_vars)
+            return [resolved] if resolved else []
+
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod):
+            resolved = self._resolve_mod_string(node, known_vars)
+            return [resolved] if resolved else []
+
+        return []
+
+    def _get_name_strings(self, node: ast.Name, variables: _TStrVars) -> list[tuple[str, int]]:
+        key = self._unique_key(node)
+        if key in variables:
+            return [variables[key]]
+
+        return []
+
+    def _resolve_joined_string(self, node: ast.JoinedStr, variables: _TStrVars) -> tuple[str, int] | None:
+        value_parts: list[str] = []
+        line = node.lineno
+
+        for part in node.values:
+            if isinstance(part, ast.Constant) and isinstance(part.value, str):
+                value_parts.append(part.value)
+                line = part.lineno
+                continue
+
+            if not isinstance(part, ast.FormattedValue):
+                continue
+
+            nested = self._get_strings(part.value, variables)
+            if nested:
+                value_parts.append(nested[0][0])
+                line = nested[0][1]
+
+        if not value_parts:
+            return None
+
+        return ("".join(value_parts), line)
+
+    def _resolve_mod_string(self, node: ast.BinOp, variables: _TStrVars) -> tuple[str, int] | None:
+        left_strings = self._get_strings(node.left, variables)
+        if not left_strings:
+            return None
+
+        fmt, fmt_line = left_strings[0]
+        right_value = self._resolve_mod_value(node.right, variables)
+        if right_value is None:
+            return None
+
+        with suppress(TypeError, ValueError):
+            return (fmt % right_value, fmt_line)
+
+        return None
+
+    def _resolve_mod_value(self, node: ast.AST, variables: _TStrVars) -> str | tuple[str, ...] | None:
+        if isinstance(node, ast.Tuple):
+            items: list[str] = []
+            for item in node.elts:
+                values = self._get_strings(item, variables)
+                if not values:
+                    return None
+                items.append(values[0][0])
+            return tuple(items)
+
+        values = self._get_strings(node, variables)
+        if values:
+            return values[0][0]
+
+        return None
 
     def _check_node(
         self, args: list[ast.expr], variables: _TStrVars, category: _MsgCategory, file_specs: FileSpecsDto
     ) -> None:
         for arg in args:
-            if not isinstance(arg, ast.Name):
-                strings = self._get_strings(arg)
-            else:
-                key = self._unique_key(arg)
-                strings = [variables[key]] if key in variables else []
+            strings = self._get_strings(arg, variables)
 
             file_rel_path = file_specs.rel_path
             cat_name = category.value
